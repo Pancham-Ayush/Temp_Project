@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --sidebar-bg: #1f2937;
+            --right-aside-bg: #e0e7ff;
+            --card-bg: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --primary-blue: #4f46e5;
+            --yellow-accent: #f59e0b;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-primary); }
+        * { box-sizing: border-box; }
+        .app-container { display: grid; grid-template-columns: 260px 1fr 320px; min-height: 100vh; }
+        .profile-sidebar { background-color: var(--sidebar-bg); color: #d1d5db; display: flex; flex-direction: column; padding: 1.5rem; }
+        .sidebar-header { margin-bottom: 2rem; }
+        .logo { height: 30px; filter: invert(1) brightness(2); }
+        .profile-card { text-align: center; margin-bottom: 2rem; }
+        .avatar-initials { width: 80px; height: 80px; border-radius: 50%; background-color: var(--primary-blue); color: white; font-weight: 700; font-size: 2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; border: 4px solid #374151; }
+        .profile-card h2 { color: white; margin: 0; }
+        .profile-card p { color: #9ca3af; margin: 0.25rem 0 1rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
+        .tag { background-color: #374151; color: #d1d5db; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 500; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+        .nav-item { padding: 0.75rem 1rem; border-radius: 0.375rem; text-decoration: none; color: #d1d5db; font-weight: 500; transition: all 0.2s; }
+        .nav-item:hover { background-color: #374151; color: white; }
+        .nav-item.active { background-color: var(--primary-blue); color: white; }
+        .main-content-wrapper { display: flex; flex-direction: column; padding: 1.5rem; overflow: hidden; }
+        .top-bar { display: flex; align-items: center; margin-bottom: 2rem; }
+        .search-bar { display: flex; align-items: center; background-color: white; border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 0.5rem 1rem; flex-grow: 1; max-width: 500px; box-shadow: var(--shadow); }
+        .search-icon { color: var(--text-secondary); margin-right: 0.5rem; }
+        .search-bar input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.875rem; }
+        .welcome-header { font-size: 1.75rem; font-weight: 700; margin: 0 0 1.5rem; }
+        .card { background-color: var(--card-bg); border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); margin-bottom: 1.5rem; }
+        .performance-overview-card .card-header h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.25rem; color: #111827; }
+        .performance-overview-card .card-header p { font-size: 1rem; color: #6b7280; margin: 0; }
+        .key-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 2rem 0; text-align: center; }
+        .metric-item { background-color: #f9fafb; border: 1px solid #e5e7eb; padding: 1.5rem; border-radius: 0.75rem; }
+        .metric-value { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .metric-value.grade { color: #1d4ed8; }
+        .metric-value.on-time { color: #16a34a; }
+        .metric-value.graded { color: #57534e; }
+        .metric-label { font-size: 0.875rem; font-weight: 500; color: #6b7280; }
+        .chart-section h3 { font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem; text-align: center; color: #374151; }
+        .chart-container { display: flex; height: 250px; }
+        .y-axis-labels { display: flex; flex-direction: column; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; padding-right: 1rem; text-align: right; }
+        .chart { flex-grow: 1; display: flex; justify-content: space-around; align-items: flex-end; gap: 1rem; border-left: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; padding: 0 1rem; }
+        .chart-bar { width: 100%; background: linear-gradient(to top, #60a5fa, #3b82f6); border-radius: 4px 4px 0 0; position: relative; transition: all 0.2s ease-in-out; }
+        .chart-bar:hover { transform: scaleY(1.05); background: linear-gradient(to top, #3b82f6, #2563eb); }
+        .tooltip { position: absolute; top: -2rem; left: 50%; transform: translateX(-50%); background-color: #1f2937; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; }
+        .chart-bar:hover .tooltip { opacity: 1; }
+        .x-axis-labels { display: flex; justify-content: space-around; padding: 0.5rem 1rem 0; margin-left: 30px; font-size: 0.875rem; font-weight: 500; color: #6b7280; }
+        .right-aside { background-color: var(--right-aside-bg); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+        .widget-card { background-color: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .widget-card h3 { margin: 0 0 1rem; font-size: 1rem; font-weight: 600; }
+        .widget-item { padding: 1rem 0; border-top: 1px solid var(--border-color); }
+        .widget-item:first-of-type { border-top: none; padding-top: 0;}
+        .widget-title { margin: 0 0 0.25rem; font-weight: 500; font-size: 0.875rem; }
+        .widget-meta { margin: 0; font-size: 0.75rem; color: var(--text-secondary); }
+        .view-all-link { display: block; text-align: center; color: var(--primary-blue); font-weight: 600; font-size: 0.875rem; text-decoration: none; margin-top: 1rem; }
+        .streak-calendar-card h3 { margin: 0 0 1.5rem; }
+        .streak-summary { display: flex; justify-content: space-around; text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .summary-item { display: flex; align-items: center; gap: 0.75rem; }
+        .summary-item svg { flex-shrink: 0; }
+        .summary-value { font-size: 1.125rem; font-weight: 700; margin: 0; }
+        .summary-label { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+        .calendar-grid { text-align: center; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.75rem; }
+        .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .day-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.875rem; font-weight: 500; transition: all 0.2s ease; }
+        .day-cell.inactive { color: #d1d5db; }
+        .day-cell.active { background-color: var(--primary-blue); color: white; }
+        .day-cell.current-streak { background-color: var(--yellow-accent); color: var(--text-primary); font-weight: 700; animation: pulse 2s infinite; border: 2px solid var(--yellow-accent); }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); } }
+        @media (max-width: 1200px) {
+            .app-container { grid-template-columns: 260px 1fr; }
+            .right-aside { display: none; }
+        }
+        @media (max-width: 992px) {
+            .app-container { grid-template-columns: 1fr; }
+            .main-content-wrapper { padding: 1rem; }
+            .key-metrics { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 576px) {
+            .main-content-wrapper { padding: 1rem 0.75rem; }
+            .top-bar { margin-bottom: 1.5rem; }
+            .welcome-header { font-size: 1.5rem; margin-bottom: 1rem; }
+            .card { padding: 1.5rem; }
+            .performance-overview-card .card-header h2 { font-size: 1.25rem; }
+            .performance-overview-card .card-header p { font-size: 0.875rem; }
+            .key-metrics { gap: 1rem; margin: 1.5rem 0; }
+            .metric-item { padding: 1rem; }
+            .metric-value { font-size: 2.25rem; }
+            .chart-section h3 { font-size: 1rem; }
+            .chart-container { height: 200px; }
+            .y-axis-labels { font-size: 0.7rem; padding-right: 0.5rem; }
+            .x-axis-labels { font-size: 0.7rem; margin-left: calc(20px + 0.5rem); }
+            .chart { gap: 0.5rem; padding: 0 0.5rem; }
+            .tooltip { font-size: 0.65rem; padding: 0.2rem 0.4rem; top: -1.75rem; }
+        }
+        .mobile-nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; margin-right: 0.5rem; color: var(--text-primary); }
+        @media (max-width: 992px) {
+            .mobile-nav-toggle { display: block; z-index: 1001; }
+            .profile-sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; z-index: 1000; transform: translateX(-100%); transition: transform 0.3s ease-in-out; box-shadow: 5px 0 15px rgba(0,0,0,0.1); display: flex; }
+            .profile-sidebar.is-open { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <aside class="profile-sidebar">
+            <div class="sidebar-header">
+                <img src="https://masaischool.com/img/navbar/logo_white.svg" alt="Logo" class="logo">
+            </div>
+            <div class="profile-card">
+                <div class="avatar-initials">U</div>
+                <h2>Upendra Akki</h2>
+                <p>@upendra-akki</p>
+                <div class="tags">
+                    <span class="tag">Core Java</span>
+                    <span class="tag">Spring Boot</span>
+                    <span class="tag">DSA</span>
+                </div>
+            </div>
+             <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">Dashboard</a>
+                <a href="#" class="nav-item">Assignments</a>
+                <a href="#" class="nav-item">Lectures</a>
+                <a href="#" class="nav-item">Discussions</a>
+            </nav>
+        </aside>
+
+        <div class="main-content-wrapper">
+            <header class="top-bar">
+                <button class="mobile-nav-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+                <div class="search-bar">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" placeholder="Search by concepts, lectures, assignment etc...">
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+                <h1 class="welcome-header">Welcome, Upendra!</h1>
+                
+                <div class="card performance-overview-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Performance Overview</h2>
+                            <p>Your progress and performance over time</p>
+                        </div>
+                    </div>
+            
+                    <div class="key-metrics">
+                        <div class="metric-item">
+                            <div class="metric-value grade">88%</div>
+                            <div class="metric-label">Overall Grade</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value on-time">92%</div>
+                            <div class="metric-label">On-Time Submissions</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-value graded">15/20</div>
+                            <div class="metric-label">Assignments Graded</div>
+                        </div>
+                    </div>
+            
+                    <div class="chart-section">
+                        <h3>Monthly Performance (Average Score)</h3>
+                        <div class="chart-container">
+                            <div class="y-axis-labels">
+                                <span>100</span><span>75</span><span>50</span><span>25</span><span>0</span>
+                            </div>
+                            <div class="chart">
+                                <div class="chart-bar" style="height: 82%;"><div class="tooltip">Jan: 82%</div></div>
+                                <div class="chart-bar" style="height: 75%;"><div class="tooltip">Feb: 75%</div></div>
+                                <div class="chart-bar" style="height: 88%;"><div class="tooltip">Mar: 88%</div></div>
+                                <div class="chart-bar" style="height: 91%;"><div class="tooltip">Apr: 91%</div></div>
+                                <div class="chart-bar" style="height: 85%;"><div class="tooltip">May: 85%</div></div>
+                                <div class="chart-bar" style="height: 94%;"><div class="tooltip">Jun: 94%</div></div>
+                            </div>
+                        </div>
+                        <div class="x-axis-labels">
+                            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+        
+        <aside class="right-aside">
+            <div class="widget-card streak-calendar-card">
+                <h3>Monthly Activity Streak</h3>
+                <div class="streak-summary">
+                    <div class="summary-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4-4 8-8 8-12a8 8 0 0 0-16 0c0 4 4 8 8 12Z"/></svg>
+                        <div><p class="summary-value">7 Days</p><p class="summary-label">Current Streak</p></div>
+                    </div>
+                    <div class="summary-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 17.5L18 21l-1.5-6.5L22 9h-7L12 3l-3 6H2l5.5 5.5L6 21l6.5-3.5z"/></svg>
+                        <div><p class="summary-value">21 Days</p><p class="summary-label">Longest Streak</p></div>
+                    </div>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-header"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+                    <div class="calendar-body">
+                        <div class="day-cell inactive">28</div><div class="day-cell inactive">29</div><div class="day-cell inactive">30</div>
+                        <div class="day-cell">1</div><div class="day-cell">2</div><div class="day-cell active">3</div><div class="day-cell">4</div>
+                        <div class="day-cell">5</div><div class="day-cell active">6</div><div class="day-cell active">7</div><div class="day-cell">8</div>
+                        <div class="day-cell">9</div><div class="day-cell">10</div><div class="day-cell">11</div><div class="day-cell active">12</div>
+                        <div class="day-cell">13</div><div class="day-cell active">14</div><div class="day-cell active">15</div><div class="day-cell active">16</div>
+                        <div class="day-cell current-streak">17</div><div class="day-cell">18</div><div class="day-cell">19</div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-card">
+                <h3>Announcements</h3>
+                <div class="widget-item"><p class="widget-title">IRP #02 : Resume Masterclass</p><p class="widget-meta">29 May, 2025</p></div>
+                <div class="widget-item"><p class="widget-title">Announcing the xto10x Hackathon</p><p class="widget-meta">4 Apr, 2025</p></div>
+                <a href="#" class="view-all-link">VIEW ALL</a>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const menuButton = document.querySelector('.mobile-nav-toggle');
+        const sidebar = document.querySelector('.profile-sidebar');
+        menuButton.addEventListener('click', () => {
+            sidebar.classList.toggle('is-open');
+        });
+    </script>
+
+</body>
+</html>
